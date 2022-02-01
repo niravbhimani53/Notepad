@@ -16,12 +16,12 @@ public class Storage: NSTextStorage {
     /// The Theme for the Notepad.
     public var theme: Theme? {
         didSet {
-            let wholeRange = NSRange(location: 0, length: (self.string as NSString).length)
+            let wholeRange = NSRange(location: 0, length: (string as NSString).length)
 
-            self.beginEditing()
-            self.applyStyles(wholeRange)
-            self.edited(.editedAttributes, range: wholeRange, changeInLength: 0)
-            self.endEditing()
+            beginEditing()
+            applyStyles(wholeRange)
+            edited(.editedAttributes, range: wholeRange, changeInLength: 0)
+            endEditing()
         }
     }
 
@@ -29,36 +29,35 @@ public class Storage: NSTextStorage {
     var backingStore = NSTextStorage()
 
     override public var string: String {
-        get {
-            return backingStore.string
-        }
+        return backingStore.string
     }
 
     override public init() {
         super.init()
     }
-    
+
     override public init(attributedString attrStr: NSAttributedString) {
-        super.init(attributedString:attrStr)
+        super.init(attributedString: attrStr)
         backingStore.setAttributedString(attrStr)
     }
 
-    required public init?(coder aDecoder: NSCoder) {
+    @available(*, unavailable)
+    public required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    required public init(itemProviderData data: Data, typeIdentifier: String) throws {
+
+    public required init(itemProviderData _: Data, typeIdentifier _: String) throws {
         fatalError("init(itemProviderData:typeIdentifier:) has not been implemented")
     }
-    
+
     #if os(macOS)
-    required public init?(pasteboardPropertyList propertyList: Any, ofType type: String) {
-        fatalError("init(pasteboardPropertyList:ofType:) has not been implemented")
-    }
-    
-    required public init?(pasteboardPropertyList propertyList: Any, ofType type: NSPasteboard.PasteboardType) {
-        fatalError("init(pasteboardPropertyList:ofType:) has not been implemented")
-    }
+        public required init?(pasteboardPropertyList _: Any, ofType _: String) {
+            fatalError("init(pasteboardPropertyList:ofType:) has not been implemented")
+        }
+
+        public required init?(pasteboardPropertyList _: Any, ofType _: NSPasteboard.PasteboardType) {
+            fatalError("init(pasteboardPropertyList:ofType:) has not been implemented")
+        }
     #endif
 
     /// Finds attributes within a given range on a String.
@@ -67,7 +66,7 @@ public class Storage: NSTextStorage {
     /// - parameter range:    The range to find attributes for.
     ///
     /// - returns: The attributes on a String within a certain range.
-    override public func attributes(at location: Int, longestEffectiveRange range: NSRangePointer?, in rangeLimit: NSRange) -> [NSAttributedString.Key : Any] {
+    override public func attributes(at location: Int, longestEffectiveRange range: NSRangePointer?, in rangeLimit: NSRange) -> [NSAttributedString.Key: Any] {
         return backingStore.attributes(at: location, longestEffectiveRange: range, in: rangeLimit)
     }
 
@@ -76,33 +75,33 @@ public class Storage: NSTextStorage {
     /// - parameter range: The range to replace.
     /// - parameter str:   The new string to replace the range with.
     override public func replaceCharacters(in range: NSRange, with str: String) {
-        self.beginEditing()
+        beginEditing()
         backingStore.replaceCharacters(in: range, with: str)
         let len = (str as NSString).length
         let change = len - range.length
-        self.edited([.editedCharacters, .editedAttributes], range: range, changeInLength: change)
-        self.endEditing()
+        edited([.editedCharacters, .editedAttributes], range: range, changeInLength: change)
+        endEditing()
     }
 
     /// Sets the attributes on a string for a particular range.
     ///
     /// - parameter attrs: The attributes to add to the string for the range.
     /// - parameter range: The range in which to add attributes.
-    public override func setAttributes(_ attrs: [NSAttributedString.Key : Any]?, range: NSRange) {
-        self.beginEditing()
+    override public func setAttributes(_ attrs: [NSAttributedString.Key: Any]?, range: NSRange) {
+        beginEditing()
         backingStore.setAttributes(attrs, range: range)
-        self.edited(.editedAttributes, range: range, changeInLength: 0)
-        self.endEditing()
+        edited(.editedAttributes, range: range, changeInLength: 0)
+        endEditing()
     }
-    
+
     /// Retrieves the attributes of a string for a particular range.
     ///
     /// - parameter at: The location to begin with.
     /// - parameter range: The range in which to retrieve attributes.
-    public override func attributes(at location: Int, effectiveRange range: NSRangePointer?) -> [NSAttributedString.Key : Any] {
+    override public func attributes(at location: Int, effectiveRange range: NSRangePointer?) -> [NSAttributedString.Key: Any] {
         return backingStore.attributes(at: location, effectiveRange: range)
     }
-    
+
     /// Processes any edits made to the text in the editor.
     override public func processEditing() {
         let backingString = backingStore.string
@@ -118,13 +117,13 @@ public class Storage: NSTextStorage {
     ///
     /// - parameter range: The range in which to apply styles.
     func applyStyles(_ range: NSRange) {
-        guard let theme = self.theme else { return }
+        guard let theme = theme else { return }
 
         let backingString = backingStore.string
         backingStore.setAttributes(theme.body.attributes, range: range)
 
-        for (style) in theme.styles {
-            style.regex.enumerateMatches(in: backingString, options: .withoutAnchoringBounds, range: range, using: { (match, flags, stop) in
+        for style in theme.styles {
+            style.regex.enumerateMatches(in: backingString, options: .withoutAnchoringBounds, range: range, using: { match, _, _ in
                 guard let match = match else { return }
                 backingStore.addAttributes(style.attributes, range: match.range(at: 0))
             })

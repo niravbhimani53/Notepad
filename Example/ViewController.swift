@@ -6,15 +6,14 @@
 //  Copyright © 2016 Rudd Fawcett. All rights reserved.
 //
 
-import UIKit
 import Notepad
+import UIKit
 
 class ViewController: UIViewController {
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let editor = Notepad(frame: self.view.bounds, themeFile: "one-dark")
+        let editor = Notepad(frame: view.bounds, themeFile: "one-dark")
 
         let testFile = Bundle.main.path(forResource: "tests", ofType: "md")
         do {
@@ -25,12 +24,11 @@ class ViewController: UIViewController {
         }
 
         editor.textContainerInset = UIEdgeInsets(top: 40, left: 20, bottom: 40, right: 20)
-        self.view.addSubview(editor)
+        view.addSubview(editor)
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
 }

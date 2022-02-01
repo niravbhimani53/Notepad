@@ -5,7 +5,6 @@
 //  Created by Rudd Fawcett on 10/14/16.
 //  Copyright © 2016 Rudd Fawcett. All rights reserved.
 //
-
 import Foundation
 
 public struct Style {
@@ -13,7 +12,7 @@ public struct Style {
     public var attributes: [NSAttributedString.Key: Any] = [:]
 
     public init(element: Element, attributes: [NSAttributedString.Key: Any]) {
-        self.regex = element.toRegex()
+        regex = element.toRegex()
         self.attributes = attributes
     }
 
@@ -23,6 +22,6 @@ public struct Style {
     }
 
     public init() {
-        self.regex = Element.unknown.toRegex()
+        regex = Element.unknown.toRegex()
     }
 }

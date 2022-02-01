@@ -13,8 +13,7 @@
 #endif
 
 public struct Theme {
-
-    public enum BuiltIn: String {
+    public enum BuiltIn: String, CaseIterable {
         case Base16TomorrowDark = "base16-tomorrow-dark"
         case Base16TomorrowLight = "base16-tomorrow-light"
         case BluesClues = "blues-clues"
@@ -27,20 +26,19 @@ public struct Theme {
         case SystemMinimal = "system-minimal"
 
         public func theme() -> Theme {
-            return Theme(self.rawValue)
+            return Theme(rawValue)
         }
     }
 
     /// The body style for the Notepad editor.
-    public var body: Style = Style()
+    public var body: Style = .init()
     /// The background color of the Notepad.
-    public var backgroundColor: UniversalColor = UniversalColor.clear
+    public var backgroundColor: UniversalColor = .clear
     /// The tint color (AKA cursor color) of the Notepad.
-    public var tintColor: UniversalColor = UniversalColor.blue
+    public var tintColor: UniversalColor = .blue
 
     /// All of the other styles for the Notepad editor.
     public var styles: [Style] = []
-    
 
     /// Build a theme from a JSON theme file.
     ///
@@ -49,45 +47,37 @@ public struct Theme {
     /// - returns: The Theme.
     public init(_ name: String) {
         let bundle = Bundle(for: Notepad.self)
-        
-        let path: String
-        
-        if let path1 = bundle.path(forResource: "Notepad.framework/themes/\(name)", ofType: "json") {
-            
-            path = path1
-        }
-        else if let path2 = bundle.path(forResource: "Notepad.framework/\(name)", ofType: "json") {
-            
-            path = path2
-        }
-        else if let path3 = bundle.path(forResource: "themes/\(name)", ofType: "json") {
 
+        let path: String
+
+        if let path1 = bundle.path(forResource: "Notepad.framework/themes/\(name)", ofType: "json") {
+            path = path1
+        } else if let path2 = bundle.path(forResource: "Notepad.framework/\(name)", ofType: "json") {
+            path = path2
+        } else if let path3 = bundle.path(forResource: "themes/\(name)", ofType: "json") {
             path = path3
-        }
-        else if let path4 = bundle.path(forResource: name, ofType: "json") {
-            
+        } else if let path4 = bundle.path(forResource: name, ofType: "json") {
             path = path4
-        }
-        else {
-            
+        } else if let path5 = bundle.path(forResource: "themes/\(name)", ofType: "json") {
+            path = path5
+        } else {
             print("[Notepad] Unable to load your theme file.")
             assertionFailure()
             return
         }
-        
+
         if let data = convertFile(path) {
             configure(data)
         }
     }
-    
+
     public init(themePath: String) {
         if let data = convertFile(themePath) {
             configure(data)
         }
     }
-    
-    public init() {
-    }
+
+    public init() {}
 
     /// Configures all of the styles for the Theme.
     ///
@@ -107,8 +97,7 @@ public struct Theme {
                     }
                     body = Style(element: .body, attributes: parsedBodyStyles)
                 }
-            }
-            else { // Create a default body font so other styles can inherit from it.
+            } else { // Create a default body font so other styles can inherit from it.
                 var textColor = UniversalColor.black
                 if #available(iOS 13.0, *) {
                     textColor = UniversalColor.label
@@ -119,12 +108,11 @@ public struct Theme {
 
             allStyles.removeValue(forKey: "body")
             for (element, attributes) in allStyles {
-                if let parsedStyles = parse(attributes as! [String : AnyObject]) {
+                if let parsedStyles = parse(attributes as! [String: AnyObject]) {
                     if let regexString = attributes["regex"] as? String {
                         let regex = regexString.toRegex()
                         styles.append(Style(regex: regex, attributes: parsedStyles))
-                    }
-                    else {
+                    } else {
                         styles.append(Style(element: Element.unknown.from(string: element), attributes: parsedStyles))
                     }
                 }
@@ -158,13 +146,13 @@ public struct Theme {
         if let color = attributes["color"] as? String {
             stringAttributes[NSAttributedString.Key.foregroundColor] = UniversalColor(hexString: color)
         }
-        
+
         let bodyFont = body.attributes[NSAttributedString.Key.font] as? UniversalFont
         // if size is set use custom size, otherwise use body font size, otherwise fallback to 15 points
         let fontSize: CGFloat = attributes["size"] as? CGFloat ?? (bodyFont?.pointSize ?? 15)
         let fontTraits = attributes["traits"] as? String ?? ""
         var font: UniversalFont?
-        
+
         if let fontName = attributes["font"] as? String, fontName != "System" {
             // use custom font if set
             font = UniversalFont(name: fontName, size: fontSize)?.with(traits: fontTraits, size: fontSize)

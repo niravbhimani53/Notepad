@@ -56,7 +56,7 @@ extension String {
     ///
     /// - returns: The NSRegularExpression.
     func toRegex() -> NSRegularExpression {
-        var pattern: NSRegularExpression = NSRegularExpression()
+        var pattern = NSRegularExpression()
 
         do {
             try pattern = NSRegularExpression(pattern: self, options: .anchorsMatchLines)
@@ -79,7 +79,7 @@ extension String {
             let to16 = utf16.index(from16, offsetBy: nsRange.length, limitedBy: utf16.endIndex),
             let from = String.Index(from16, within: self),
             let to = String.Index(to16, within: self)
-            else { return nil }
+        else { return nil }
         return from ..< to
     }
 }
@@ -89,27 +89,29 @@ extension UniversalFont {
         guard let traits = getTraits(from: traits) else {
             return self
         }
-        let descriptor = fontDescriptor.withSymbolicTraits(traits) ?? UniversalFontDescriptor(fontAttributes: [:])
+        let descriptor = fontDescriptor.withSymbolicTraits(traits)
         return UniversalFont(descriptor: descriptor, size: size)
     }
-    
+
     private func getTraits(from traits: String) -> UniversalTraits? {
         #if os(iOS)
-        switch traits {
+            switch traits {
             case "italic": return .traitItalic
             case "bold": return .traitBold
+            case "boldItalic": return [.traitBold, .traitItalic]
             case "expanded": return .traitExpanded
             case "condensed": return .traitCondensed
             default: return nil
-        }
+            }
         #elseif os(macOS)
-        switch traits {
+            switch traits {
             case "italic": return .italic
             case "bold": return .bold
+            case "boldItalic": return [.italic, .bold]
             case "expanded": return .expanded
             case "condensed": return .condensed
             default: return nil
-        }
+            }
         #endif
     }
 }

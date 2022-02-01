@@ -7,10 +7,9 @@
 //
 
 #if os(macOS)
-import AppKit
+    import AppKit
 
-public class Notepad: NSTextView {
-
-    var storage: Storage = Storage()
-}
+    public class Notepad: NSTextView {
+        var storage: Storage = .init()
+    }
 #endif
